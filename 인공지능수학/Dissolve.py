@@ -5,8 +5,10 @@ import io # 이미지를 바이트 형태로 변환하여 다운로드하기 위
 import time
 
 st.title("디졸브 효과")
-# st.page_link(page="https://mathzip.streamlit.app/ImageConversion",label="이미지의 데이터 변환 돌아가기",icon="⬅️",width="width="content")
-st.divider()
+with st.container(horizontal=True):
+    st.space("stretch")
+    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
+
 @st.cache_data(show_spinner=False, ttl=300)
 def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
     # 바이트 -> 이미지 -> 리사이즈 -> 배열 변환
