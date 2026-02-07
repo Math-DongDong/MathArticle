@@ -12,6 +12,7 @@ st.set_page_config(
 pages = {
     "인공지능 수학": [
         st.Page("./인공지능수학/Dissolve.py", title="디졸브 효과"),
+        st.Page("./인공지능수학/margin.py", title="마진",default=True),
     ],
 }
 
