@@ -129,7 +129,7 @@ if file1 and file2:
 
         # 애니메이션 루프 (자동 모드이고, 재생 중일 때만 실행)
         if auto_mode and st.session_state.animation_running:
-            time.sleep(0.4) # 속도 조절
+            time.sleep(0.2) # 속도 조절
             
             st.session_state.current_alpha += 0.05
             
