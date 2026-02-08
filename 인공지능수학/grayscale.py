@@ -22,9 +22,9 @@ if uploaded_file is not None:
     original_width, original_height = image.size
 
     # =========================================================
-    # [요청사항 반영] 최대 픽셀 제한 로직 (500px)
+    # [요청사항 반영] 최대 픽셀 제한 로직 (300px)
     # =========================================================
-    MAX_PIXELS = 500
+    MAX_PIXELS = 300
 
     # 기본값 계산: 원본이 500보다 크면 500으로, 작으면 원본 크기 그대로
     default_w = MAX_PIXELS if original_width > MAX_PIXELS else original_width
@@ -38,7 +38,7 @@ if uploaded_file is not None:
     with col_edit:
         st.subheader("⚙️ 해상도 설정")
         
-        # [수정] max_value를 500으로 제한하고, 위에서 계산한 default 값을 적용
+        # [수정] max_value를 300으로 제한하고, 위에서 계산한 default 값을 적용
         new_width = st.number_input(
             "가로(Width) 픽셀", 
             min_value=1, 
@@ -91,7 +91,7 @@ if uploaded_file is not None:
         # 엑셀 다운로드 (픽셀 데이터)
         output_excel = io.BytesIO()
         
-        # 해상도가 500px로 제한되었으므로 엑셀 생성 속도가 보장됩니다.
+        # 해상도가 300px로 제한되었으므로 엑셀 생성 속도가 보장됩니다.
         with st.spinner("엑셀 파일 생성 중...", show_time=True):
             with pd.ExcelWriter(output_excel, engine='xlsxwriter') as writer:
                 # 2차원 그레이스케일 데이터 저장
