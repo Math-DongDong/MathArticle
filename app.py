@@ -10,7 +10,7 @@ st.set_page_config(
 
 # 메인 페이지 정의
 def main_page():
-    st.empty
+    st.title("동동쌤의 수학 아티클 모음")
 
 # 2. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
 pages = {
