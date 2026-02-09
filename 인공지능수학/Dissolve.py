@@ -23,7 +23,7 @@ def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, tar
     return arr1, arr2
 
 @st.fragment
-def dissolve_effect(c1,c2,img_file1, img_file2,W,H):
+def dissolve_effect(img_file1, img_file2,W,H):
     # [설정 / 디졸브 / 소스]
     col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
     with col1:
