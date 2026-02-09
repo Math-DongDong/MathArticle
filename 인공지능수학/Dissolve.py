@@ -4,59 +4,22 @@ from PIL import Image
 import io 
 import time
 
+#===============================================================================================
 # 업로드된 파일을 PIL 이미지 객체로 변환
 @st.cache_data(show_spinner=False,ttl=300)
 def load_image(image_file):
     return Image.open(image_file)
 
-@st.cache_data(show_spinner=False, ttl=300)
-def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
-    # 바이트 -> 이미지 -> 리사이즈 -> 배열 변환
-    img1 = Image.open(io.BytesIO(_bytes1)).convert('RGB').resize((target_w, target_h))
-    img2 = Image.open(io.BytesIO(_bytes2)).convert('RGB').resize((target_w, target_h))
-    
-    # 0.0 ~ 1.0 범위의 실수형 배열로 변환
-    arr1 = np.array(img1, dtype=float) / 255.0
-    arr2 = np.array(img2, dtype=float) / 255.0
-    
-    return arr1, arr2
-
-st.title("디졸브 효과")
-with st.container(horizontal=True):
-    st.space("stretch")
-    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
-
-# 세션 상태 초기화
-if 'animation_running' not in st.session_state:
-    st.session_state.animation_running = False
-if 'current_alpha' not in st.session_state:
-    st.session_state.current_alpha = 0.0
-
-# 이미지 업로드
-with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
-    col_up1, col_up2 = st.columns(2)
-    with col_up1:
-        file1 = st.file_uploader("첫 번째 이미지", type=["png", "jpg", "jpeg"], key="img1")
-    with col_up2:
-        file2 = st.file_uploader("두 번째 이미지", type=["png", "jpg", "jpeg"], key="img2")
-
-if file1 and file2:
-    # 해상도 계산을 위해 1개의 파일 열기 (최대 800px)
-    temp_img = load_image(file1)
-    orig_w, orig_h = temp_img.size
-    default_w = 800 if orig_w > 800 else orig_w
-    default_h = int(orig_h * (default_w / orig_w))
-
-    # [설정 / 디졸브 / 소스]
-    col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
+@st.fragment
+def dissolve_effect(img_file1, img_file2,W,H):
     with col1:
         st.subheader("⚙️ 설정 및 제어")
         st.caption("해상도 설정")
         wcol1, wcol2 = st.columns(2)
         with wcol1:
-            target_w = st.number_input("가로", min_value=10,max_value=800, value=default_w,step=10)
+            target_w = st.number_input("가로", min_value=10,max_value=800, value=W,step=10)
         with wcol2:
-            target_h = st.number_input("세로", min_value=10, value=default_h, step=10)
+            target_h = st.number_input("세로", min_value=10, value=H, step=10)
         
         auto_mode = st.toggle("자동 실행 여부", value=False)            
         if auto_mode:
@@ -96,10 +59,10 @@ if file1 and file2:
 
     # 업로드된 이미지의 배열 출력
     arr1, arr2 = get_image_arrays(
-        file1.name, file1.size,
-        file2.name, file2.size,
-        file1.getvalue(),
-        file2.getvalue(),
+        img_file1.name, img_file1.size,
+        img_file2.name, img_file2.size,
+        img_file1.getvalue(),
+        img_file2.getvalue(),
         target_w, target_h
     )
 
@@ -127,12 +90,53 @@ if file1 and file2:
                 st.session_state.current_alpha = 1.0
                 st.session_state.animation_running = False
             
-            st.rerun() # 화면 갱신
+@st.cache_data(show_spinner=False, ttl=300)
+def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
+    # 바이트 -> 이미지 -> 리사이즈 -> 배열 변환
+    img1 = Image.open(io.BytesIO(_bytes1)).convert('RGB').resize((target_w, target_h))
+    img2 = Image.open(io.BytesIO(_bytes2)).convert('RGB').resize((target_w, target_h))
+    
+    # 0.0 ~ 1.0 범위의 실수형 배열로 변환
+    arr1 = np.array(img1, dtype=float) / 255.0
+    arr2 = np.array(img2, dtype=float) / 255.0
+    
+    return arr1, arr2
+
+#===============================================================================================
+st.title("디졸브 효과")
+with st.container(horizontal=True):
+    st.space("stretch")
+    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
+
+# 세션 상태 초기화
+if 'animation_running' not in st.session_state:
+    st.session_state.animation_running = False
+if 'current_alpha' not in st.session_state:
+    st.session_state.current_alpha = 0.0
+
+# 이미지 업로드
+with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
+    col_up1, col_up2 = st.columns(2)
+    with col_up1:
+        file1 = st.file_uploader("첫 번째 이미지", type=["png", "jpg", "jpeg"], key="img1")
+    with col_up2:
+        file2 = st.file_uploader("두 번째 이미지", type=["png", "jpg", "jpeg"], key="img2")
+
+if file1 and file2:
+    # 해상도 계산을 위해 1개의 파일 열기 (최대 800px)
+    temp_img = load_image(file1)
+    orig_w, orig_h = temp_img.size
+    default_w = 800 if orig_w > 800 else orig_w
+    default_h = int(orig_h * (default_w / orig_w))
+
+    # [설정 / 디졸브 / 소스]
+    col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
+    dissolve_effect(file1, file2,default_w,default_h)
 
     with col3:
         st.subheader("소스")
-        st.image(arr1, width="stretch", clamp=True)
-        st.image(arr2, width="stretch", clamp=True)
+        st.image(file1, width="stretch", clamp=True)
+        st.image(file2, width="stretch", clamp=True)
 
 else:
     st.info("👆 상단의 '이미지 업로드'를 열어 두 개의 이미지를 넣어주세요.")            
