@@ -24,7 +24,9 @@ def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, tar
 
 @st.fragment
 def dissolve_effect(c1,c2,img_file1, img_file2,W,H):
-    with c1:
+    # [설정 / 디졸브 / 소스]
+    col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
+    with col1:
         st.subheader("⚙️ 설정 및 제어")
         st.caption("해상도 설정")
         wcol1, wcol2 = st.columns(2)
@@ -69,16 +71,17 @@ def dissolve_effect(c1,c2,img_file1, img_file2,W,H):
             # 수동 조작 시 세션 상태도 동기화 (나중에 자동 모드 전환 시 부드럽게 이어지도록)
             st.session_state.current_alpha = manual_alpha
 
-    # 업로드된 이미지의 배열 출력
-    arr1, arr2 = get_image_arrays(
-        img_file1.name, img_file1.size,
-        img_file2.name, img_file2.size,
-        img_file1.getvalue(),
-        img_file2.getvalue(),
-        target_w, target_h
-    )
 
-    with c2:
+    with col2:
+        # 업로드된 이미지의 배열 출력
+        arr1, arr2 = get_image_arrays(
+            img_file1.name, img_file1.size,
+            img_file2.name, img_file2.size,
+            img_file1.getvalue(),
+            img_file2.getvalue(),
+            target_w, target_h
+        )
+
         st.subheader("✨ 결과")
         blended = (arr1 * (1 - alpha)) + (arr2 * alpha)
         st.image(
@@ -101,6 +104,14 @@ def dissolve_effect(c1,c2,img_file1, img_file2,W,H):
             if st.session_state.current_alpha > 1.0:
                 st.session_state.current_alpha = 1.0
                 st.session_state.animation_running = False
+            
+            st.rerun(scope="fragment")    
+
+    with col3:
+        st.subheader("소스")
+        st.image(img_file1, width="stretch", clamp=True)
+        st.image(img_file2, width="stretch", clamp=True)
+
 
     
 #===============================================================================================
@@ -130,15 +141,7 @@ if file1 and file2:
     default_w = 800 if orig_w > 800 else orig_w
     default_h = int(orig_h * (default_w / orig_w))
 
-    # [설정 / 디졸브 / 소스]
-    col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
-    dissolve_effect(col1, col2,file1, file2,default_w,default_h)
-
-    with col3:
-        st.subheader("소스")
-        st.image(file1, width="stretch", clamp=True)
-        st.image(file2, width="stretch", clamp=True)
-
+    dissolve_effect(file1, file2,default_w,default_h)
 
 else:
     st.info("👆 상단의 '이미지 업로드'를 열어 두 개의 이미지를 넣어주세요.")            
