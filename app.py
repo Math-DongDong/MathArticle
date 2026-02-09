@@ -1,22 +1,21 @@
 import streamlit as st
 
 # 1. 페이지 레이아웃 설정
-# layout="wide"로 설정 For 상단 메뉴바 표시
 st.set_page_config(
     page_title="동동쌤의 수학모음",
     page_icon="./기타/동동이.PNG",
     layout="wide"
 )
 
-# 메인 페이지 정의
+# 2. 메인 페이지 정의
 def main_page():
     st.title("동동쌤의 수학 아티클 모음")
 
-# 2. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
+# 3. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
 pages = {
     "인공지능 수학": [
         st.Page("./인공지능수학/Dissolve.py", title="디졸브 효과"),
-        st.Page("./인공지능수학/grayscale.py", title="그레이 필터 이미지 데이터 다운로드"),
+        st.Page("./인공지능수학/GrayScale.py", title="그레이 필터 이미지 데이터 다운로드"),
     ],
     "메인페이지": [
         st.Page(main_page, title="마진",default=True),

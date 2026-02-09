@@ -1,13 +1,13 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
-import io # 이미지를 바이트 형태로 변환하여 다운로드하기 위해 필요
+import io 
 import time
 
-st.title("디졸브 효과")
-with st.container(horizontal=True):
-    st.space("stretch")
-    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
+# 업로드된 파일을 PIL 이미지 객체로 변환
+@st.cache_data(show_spinner=False,ttl=300)
+def load_image(image_file):
+    return Image.open(image_file)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
@@ -20,6 +20,11 @@ def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, tar
     arr2 = np.array(img2, dtype=float) / 255.0
     
     return arr1, arr2
+
+st.title("디졸브 효과")
+with st.container(horizontal=True):
+    st.space("stretch")
+    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
 
 # 세션 상태 초기화
 if 'animation_running' not in st.session_state:
@@ -36,8 +41,8 @@ with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
         file2 = st.file_uploader("두 번째 이미지", type=["png", "jpg", "jpeg"], key="img2")
 
 if file1 and file2:
-    # 서버 부하 방지를 위한 해상도 계산 (최대 800px)
-    temp_img = Image.open(file1)
+    # 해상도 계산 (최대 800px)
+    temp_img = load_image(file1)
     orig_w, orig_h = temp_img.size
     default_w = 800 if orig_w > 800 else orig_w
     default_h = int(orig_h * (default_w / orig_w))
