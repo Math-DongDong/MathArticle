@@ -4,6 +4,10 @@ import pandas as pd
 from PIL import Image
 import io 
 
+@st.cache_data(show_spinner=False, ttl=300)
+def load_image(image_file):
+    return Image.open(image_file).convert('RGB')
+
 # --- 앱 제목 ---
 st.title("그레이 필터 이미지 데이터 다운로드")
 
@@ -18,7 +22,7 @@ with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
 
 if uploaded_file is not None:
     # 1. 이미지 열기 (무조건 RGB 3채널로 변환)
-    image = Image.open(uploaded_file).convert('RGB')
+    image = load_image(uploaded_file)
     original_width, original_height = image.size
 
     # =========================================================
