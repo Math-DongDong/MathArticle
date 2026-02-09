@@ -10,9 +10,21 @@ import time
 def load_image(image_file):
     return Image.open(image_file)
 
+@st.cache_data(show_spinner=False, ttl=300)
+def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
+    # 바이트 -> 이미지 -> 리사이즈 -> 배열 변환
+    img1 = Image.open(io.BytesIO(_bytes1)).convert('RGB').resize((target_w, target_h))
+    img2 = Image.open(io.BytesIO(_bytes2)).convert('RGB').resize((target_w, target_h))
+    
+    # 0.0 ~ 1.0 범위의 실수형 배열로 변환
+    arr1 = np.array(img1, dtype=float) / 255.0
+    arr2 = np.array(img2, dtype=float) / 255.0
+    
+    return arr1, arr2
+
 @st.fragment
-def dissolve_effect(img_file1, img_file2,W,H):
-    with col1:
+def dissolve_effect(c1,c2,img_file1, img_file2,W,H):
+    with c1:
         st.subheader("⚙️ 설정 및 제어")
         st.caption("해상도 설정")
         wcol1, wcol2 = st.columns(2)
@@ -66,7 +78,7 @@ def dissolve_effect(img_file1, img_file2,W,H):
         target_w, target_h
     )
 
-    with col2:
+    with c2:
         st.subheader("✨ 결과")
         blended = (arr1 * (1 - alpha)) + (arr2 * alpha)
         st.image(
@@ -89,19 +101,8 @@ def dissolve_effect(img_file1, img_file2,W,H):
             if st.session_state.current_alpha > 1.0:
                 st.session_state.current_alpha = 1.0
                 st.session_state.animation_running = False
-            
-@st.cache_data(show_spinner=False, ttl=300)
-def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
-    # 바이트 -> 이미지 -> 리사이즈 -> 배열 변환
-    img1 = Image.open(io.BytesIO(_bytes1)).convert('RGB').resize((target_w, target_h))
-    img2 = Image.open(io.BytesIO(_bytes2)).convert('RGB').resize((target_w, target_h))
-    
-    # 0.0 ~ 1.0 범위의 실수형 배열로 변환
-    arr1 = np.array(img1, dtype=float) / 255.0
-    arr2 = np.array(img2, dtype=float) / 255.0
-    
-    return arr1, arr2
 
+    
 #===============================================================================================
 st.title("디졸브 효과")
 with st.container(horizontal=True):
@@ -131,12 +132,13 @@ if file1 and file2:
 
     # [설정 / 디졸브 / 소스]
     col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
-    dissolve_effect(file1, file2,default_w,default_h)
+    dissolve_effect(col1, col2,file1, file2,default_w,default_h)
 
     with col3:
         st.subheader("소스")
         st.image(file1, width="stretch", clamp=True)
         st.image(file2, width="stretch", clamp=True)
+
 
 else:
     st.info("👆 상단의 '이미지 업로드'를 열어 두 개의 이미지를 넣어주세요.")            
