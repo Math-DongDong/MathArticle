@@ -116,8 +116,8 @@ if 'current_alpha' not in st.session_state:
 # [1] 파일 업로드 (이 부분은 프래그먼트 밖에서 실행 -> 리로드 시 깜빡임 방지)
 with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
     up_c1, up_c2 = st.columns(2)
-    f1 = up_c1.file_uploader("이미지 1", type=["png", "jpg", "jpeg"], key="img1")
-    f2 = up_c2.file_uploader("이미지 2", type=["png", "jpg", "jpeg"], key="img2")
+    f1 = up_c1.file_uploader("첫 번째 이미지", type=["png", "jpg", "jpeg"], key="img1")
+    f2 = up_c2.file_uploader("두 번째 이미지", type=["png", "jpg", "jpeg"], key="img2")
 
 # [2] 파일이 준비되면 프래그먼트 실행
 if f1 and f2:
