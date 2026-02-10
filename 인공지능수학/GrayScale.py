@@ -78,7 +78,7 @@ def gray_filter_fragment(image, original_width, original_height, filename):
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
-        with st.container(horizontal=True) # 컨테이너로 감싸서 caption과 버튼이 같은 줄에 있도록
+        with st.container(horizontal=True): # 컨테이너로 감싸서 caption과 버튼이 같은 줄에 있도록
             st.space("stretch")
             st.caption(f"※ 최대 {MAX_PIXELS}px 까지만 지원됩니다.")
 
