@@ -5,7 +5,6 @@ from PIL import Image
 import io 
 
 #===============================================================================================
-@st.cache_data(show_spinner=False, ttl=300)
 def load_image(image_file):
     return Image.open(image_file).convert('RGB')
 
