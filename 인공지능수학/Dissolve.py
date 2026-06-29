@@ -40,9 +40,12 @@ html_code = '''
         <div class="max-w-6xl mx-auto mb-6">
             <div class="flex justify-between items-center">
                 <h1 class="text-3xl font-bold">디졸브 효과</h1>
-                <a href="https://mathzip.streamlit.app/ImageConversion" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                
+                <!-- 💡 [핵심 수정] 여기에 target="_parent" 를 추가했습니다! -->
+                <a href="https://mathzip.streamlit.app/ImageConversion" target="_parent" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
                     ⬅️ 이미지 데이터 변환 돌아가기
                 </a>
+                
             </div>
         </div>
 
