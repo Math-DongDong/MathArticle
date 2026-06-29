@@ -86,7 +86,7 @@ def gray_filter_fragment(image, original_width, original_height, filename):
 st.title("그레이 필터 이미지 데이터 다운로드")
 with st.container(horizontal=True):
     st.space("stretch")
-    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
+    st.page_link("https://ai-math.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
 
 # 이미지 업로드 창 생성
 with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
