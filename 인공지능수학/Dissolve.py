@@ -1,127 +1,337 @@
+# #################################################################
+# # 자바스크립트가 포함된 HTML 랜더링
+# #================================================================
 import streamlit as st
-import numpy as np
-from PIL import Image
-import io 
-import time
+import streamlit.components.v1 as components
 
-# ==============================================================================
-@st.cache_data(show_spinner=False, ttl=300)
-def load_image(image_file):
-    return Image.open(image_file)
+# HTML 및 자바스크립트 코드를 문자열로 작성
+html_code = '''
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>디졸브 효과 탐구</title>
+        <!-- Tailwind CSS 적용 -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { background-color: #ffffff; font-family: 'Pretendard', sans-serif; }
+            .canvas-container {
+                width: 100%;
+                min-height: 320px;
+                background-color: #ffffff;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-image: repeating-linear-gradient(45deg, #f1f5f9 25%, transparent 25%, transparent 75%, #f1f5f9 75%, #f1f5f9), repeating-linear-gradient(45deg, #f1f5f9 25%, #ffffff 25%, #ffffff 75%, #f1f5f9 75%, #f1f5f9);
+                background-position: 0 0, 10px 10px;
+                background-size: 20px 20px;
+            }
+            /* 캔버스는 부모 너비에 맞추되 고유 비율 유지 */
+            canvas { width: min(100%, 900px); max-height: 75vh; height: auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+            .source-img { width: 100%; height: auto; border-radius: 0.5rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); }
+        </style>
+    </head>
+    <body class="text-slate-800 p-4 sm:p-8">
 
-@st.cache_data(show_spinner=False, ttl=300)
-def get_image_arrays(name1, size1, name2, size2, _bytes1, _bytes2, target_w, target_h):
-    """바이트 데이터를 이미지 배열로 변환 (캐싱됨)"""
-    img1 = Image.open(io.BytesIO(_bytes1)).convert('RGB').resize((target_w, target_h))
-    img2 = Image.open(io.BytesIO(_bytes2)).convert('RGB').resize((target_w, target_h))
-    
-    arr1 = np.array(img1, dtype=float) / 255.0
-    arr2 = np.array(img2, dtype=float) / 255.0
-    
-    return arr1, arr2
+        <!-- 상단 헤더 -->
+        <div class="max-w-6xl mx-auto mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold">디졸브 효과</h1>
+                <a href="https://mathzip.streamlit.app/ImageConversion" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                    ⬅️ 이미지 데이터 변환 돌아가기
+                </a>
+            </div>
+        </div>
 
-@st.fragment
-def dissolve_interface(file1, file2):
-    temp_img = load_image(file1)
-    orig_w, orig_h = temp_img.size
-    default_w = 800 if orig_w > 800 else orig_w
-    default_h = int(orig_h * (default_w / orig_w))
+        <!-- 파일 업로드 영역 -->
+        <div class="max-w-6xl mx-auto mb-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📂 이미지 업로드</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">첫 번째 이미지</label>
+                    <input type="file" id="upload1" accept="image/png, image/jpeg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">두 번째 이미지</label>
+                    <input type="file" id="upload2" accept="image/png, image/jpeg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+            </div>
+        </div>
 
-    # [설정 / 디졸브 / 소스]
-    col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
-    with col1:
-        st.subheader("⚙️ 설정 및 제어")
-        st.caption("해상도 설정")
-
-        wcol1, wcol2 = st.columns(2)
-        with wcol1:
-            target_w = st.number_input("가로 픽셀", 10, 800, default_w, 10)
-        with wcol2:
-            target_h = st.number_input("세로 픽셀", 10, value=default_h, step=10)
-        
-        # 자동/수동 제어
-        auto_mode = st.toggle("자동 실행", value=False)            
-        
-        if auto_mode:
-            st.caption("자동 제어 중...")
-            if st.button("⏯️ 재생/일시정지",type="primary", width="stretch"):
-                st.session_state.animation_running = not st.session_state.animation_running
-                if st.session_state.animation_running and st.session_state.current_alpha >= 1.0:
-                    st.session_state.current_alpha = 0.0
-
-            if st.session_state.animation_running:
-                st.success(f"▶️ 재생 중: {st.session_state.current_alpha:.2f}")
-            else:
-                st.info("⏸️ 일시 정지")
+        <!-- 메인 워크스페이스 (초기엔 숨김 처리) -->
+        <div id="workspace" class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
             
-            alpha = st.session_state.current_alpha
-        else:
-            st.session_state.animation_running = False 
-            st.caption("수동 제어 중...")
-            manual_alpha = st.slider(
-                "가중치 (Alpha)",
-                min_value=0.0,
-                max_value=1.0,
-                value=st.session_state.current_alpha, # 현재 상태값 유지
-                step=0.01,
-                key="slider_val"
-            )
-            alpha = manual_alpha
-            st.session_state.current_alpha = manual_alpha
+            <!-- 1. 설정 및 제어 (25%) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-5">
+                <div>
+                    <h3 class="font-bold text-lg flex items-center gap-2 mb-1">⚙️ 설정 및 제어</h3>
+                    <p class="text-xs text-slate-400">해상도 설정</p>
+                </div>
 
-    arr1, arr2 = get_image_arrays(
-        file1.name, file1.size,
-        file2.name, file2.size,
-        file1.getvalue(),
-        file2.getvalue(),
-        target_w, target_h
-    )
+                <div class="rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm text-slate-600">
+                    <p class="font-medium text-slate-700 mb-1">📐 출력 해상도</p>
+                    <p>업로드한 이미지 크기를 기준으로 자동으로 설정됩니다. 이미지가 너무 작아도 적절하게 확대해 보여줍니다.</p>
+                </div>
 
-    with col2:
-        st.subheader("✨ 결과")
-        blended = (arr1 * (1 - alpha)) + (arr2 * alpha)
-        
-        st.image(blended, width="stretch", clamp=True)
+                <div class="border-t pt-4">
+                    <label class="flex items-center cursor-pointer mb-2">
+                        <div class="relative">
+                            <input type="checkbox" id="auto-mode" class="sr-only">
+                            <div class="block bg-slate-300 w-10 h-6 rounded-full transition-colors" id="toggle-bg"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" id="toggle-dot"></div>
+                        </div>
+                        <div class="ml-3 text-sm font-medium text-slate-700">자동 실행 모드</div>
+                    </label>
+                    <p id="mode-desc" class="text-xs text-slate-400 mb-4">수동 제어 중...</p>
 
-        # 애니메이션 로직
-        if auto_mode and st.session_state.animation_running:
-            time.sleep(0.2) # 0.2초는 조금 느려서 0.1초로 조정 (취향껏 변경)
-            st.session_state.current_alpha += 0.05
+                    <!-- 자동 제어 UI -->
+                    <div id="auto-ui" class="hidden">
+                        <button id="btn-play" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                            ⏯️ 재생 / 일시정지
+                        </button>
+                        <div id="play-status" class="mt-3 text-sm text-center px-3 py-2 bg-slate-100 rounded-md text-slate-600">
+                            ⏸️ 일시 정지
+                        </div>
+                    </div>
+
+                    <!-- 수동 제어 UI -->
+                    <div id="manual-ui">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">가중치 (Alpha): <span id="alpha-val">0.00</span></label>
+                        <input type="range" id="alpha-slider" min="0" max="1" step="0.01" value="0" class="w-full accent-blue-600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 결과 캔버스 (50%) -->
+            <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-lg mb-3 flex items-center gap-2">✨ 결과</h3>
+                <div class="canvas-container p-2">
+                    <canvas id="result-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- 3. 소스 이미지 (25%) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
+                <h3 class="font-bold text-lg mb-1">원본 소스</h3>
+                <div>
+                    <p class="text-xs text-slate-500 mb-1">이미지 1</p>
+                    <img id="src-img1" class="source-img hidden">
+                    <div id="ph1" class="w-full h-24 bg-slate-100 rounded-lg border border-dashed flex items-center justify-center text-xs text-slate-400">대기 중</div>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 mb-1">이미지 2</p>
+                    <img id="src-img2" class="source-img hidden">
+                    <div id="ph2" class="w-full h-24 bg-slate-100 rounded-lg border border-dashed flex items-center justify-center text-xs text-slate-400">대기 중</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 안내 문구 -->
+        <div id="info-msg" class="max-w-6xl mx-auto mt-4 p-4 bg-blue-50 text-blue-700 rounded-lg text-center border border-blue-100">
+            👆 상단의 '이미지 업로드'를 통해 두 개의 이미지를 넣어주세요.
+        </div>
+
+        <script>
+            // DOM 요소 가져오기
+            const upload1 = document.getElementById('upload1');
+            const upload2 = document.getElementById('upload2');
+            const workspace = document.getElementById('workspace');
+            const infoMsg = document.getElementById('info-msg');
             
-            if st.session_state.current_alpha >= 1.0:
-                st.session_state.current_alpha = 1.0
-                st.session_state.animation_running = False
+            const srcImg1 = document.getElementById('src-img1');
+            const srcImg2 = document.getElementById('src-img2');
+            const ph1 = document.getElementById('ph1');
+            const ph2 = document.getElementById('ph2');
+
+            const canvas = document.getElementById('result-canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true }); // 성능 최적화 옵션
+
+            const autoModeToggle = document.getElementById('auto-mode');
+            const toggleBg = document.getElementById('toggle-bg');
+            const toggleDot = document.getElementById('toggle-dot');
+            const modeDesc = document.getElementById('mode-desc');
+            const autoUi = document.getElementById('auto-ui');
+            const manualUi = document.getElementById('manual-ui');
+            const alphaSlider = document.getElementById('alpha-slider');
+            const alphaValText = document.getElementById('alpha-val');
             
-            # [중요] 전체 앱이 아니라, 이 'dissolve_interface' 함수만 다시 실행함
-            st.rerun(scope="fragment")
+            const btnPlay = document.getElementById('btn-play');
+            const playStatus = document.getElementById('play-status');
 
-    with col3:
-        st.subheader("소스")
-        st.image(arr1, width="stretch")
-        st.image(arr2, width="stretch")
+            // 앱 상태 변수
+            let img1Loaded = false;
+            let img2Loaded = false;
+            let isAutoMode = false;
+            let isPlaying = false;
+            let currentAlpha = 0.0;
+            let animationId = null;
+            let outputW = 0;
+            let outputH = 0;
 
+            // 이미지 로딩 처리 (FileReader 사용)
+            function handleImageUpload(input, imgElement, placeholder, callback) {
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            imgElement.src = event.target.result;
+                            imgElement.onload = () => {
+                                imgElement.classList.remove('hidden');
+                                placeholder.classList.add('hidden');
+                                callback();
+                            };
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
 
-# 상단 헤더
-st.title("디졸브 효과")
-with st.container(horizontal=True):
-    st.space("stretch")
-    st.page_link("https://mathzip.streamlit.app/ImageConversion", label="이미지의 데이터 변환 돌아가기", icon="⬅️", width="content")
+            handleImageUpload(upload1, srcImg1, ph1, checkBothLoaded);
+            handleImageUpload(upload2, srcImg2, ph2, checkBothLoaded);
 
-# 세션 상태 초기화
-if 'animation_running' not in st.session_state:
-    st.session_state.animation_running = False
-if 'current_alpha' not in st.session_state:
-    st.session_state.current_alpha = 0.0
+            // 두 이미지가 모두 업로드 되었을 때 워크스페이스 열기
+            function getAutoOutputSize(width, height) {
+                const minW = 800;
+                const minH = 600;
+                const scale = Math.max(minW / width, minH / height, 1);
 
-# [1] 파일 업로드 (이 부분은 프래그먼트 밖에서 실행 -> 리로드 시 깜빡임 방지)
-with st.expander("📂 이미지 업로드 열기/닫기", expanded=True):
-    up_c1, up_c2 = st.columns(2)
-    f1 = up_c1.file_uploader("첫 번째 이미지", type=["png", "jpg", "jpeg"], key="img1")
-    f2 = up_c2.file_uploader("두 번째 이미지", type=["png", "jpg", "jpeg"], key="img2")
+                return {
+                    width: Math.max(Math.round(width * scale), width),
+                    height: Math.max(Math.round(height * scale), height)
+                };
+            }
 
-# [2] 파일이 준비되면 프래그먼트 실행
-if f1 and f2:
-    dissolve_interface(f1, f2)
+            function checkBothLoaded() {
+                if (srcImg1.src && srcImg2.src && srcImg1.src !== window.location.href && srcImg2.src !== window.location.href) {
+                    if (!img1Loaded || !img2Loaded) {
+                        const { width, height } = getAutoOutputSize(srcImg1.naturalWidth, srcImg1.naturalHeight);
+                        outputW = width;
+                        outputH = height;
+                    }
 
-else:
-    st.info("👆 상단의 '이미지 업로드'를 열어 두 개의 이미지를 넣어주세요.")
+                    img1Loaded = true;
+                    img2Loaded = true;
+                    
+                    infoMsg.classList.add('hidden');
+                    workspace.classList.remove('hidden');
+                    
+                    updateCanvasSize();
+                    renderCanvas();
+                }
+            }
+
+            // 캔버스 크기 업데이트
+            function updateCanvasSize() {
+                if (!outputW || !outputH) return;
+                canvas.width = outputW;
+                canvas.height = outputH;
+            }
+
+            // [핵심] HTML5 Canvas를 이용한 디졸브 렌더링
+            function renderCanvas() {
+                if (!img1Loaded || !img2Loaded) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 첫 번째 이미지 그리기 (불투명도 1.0 고정)
+                ctx.globalAlpha = 1.0;
+                ctx.drawImage(srcImg1, 0, 0, canvas.width, canvas.height);
+                
+                // 두 번째 이미지 그리기 (불투명도를 Alpha 값으로 덮어씌움)
+                // 이것이 numpy의 (arr1 * (1 - alpha)) + (arr2 * alpha) 와 수학적으로 완벽히 동일합니다.
+                ctx.globalAlpha = currentAlpha;
+                ctx.drawImage(srcImg2, 0, 0, canvas.width, canvas.height);
+            }
+
+            // 수동 슬라이더 이벤트
+            alphaSlider.addEventListener('input', (e) => {
+                currentAlpha = parseFloat(e.target.value);
+                alphaValText.innerText = currentAlpha.toFixed(2);
+                renderCanvas();
+            });
+
+            // 토글 버튼 (자동/수동) 스위치 로직
+            autoModeToggle.addEventListener('change', (e) => {
+                isAutoMode = e.target.checked;
+                if (isAutoMode) {
+                    toggleBg.classList.replace('bg-slate-300', 'bg-blue-500');
+                    toggleDot.classList.add('translate-x-4');
+                    modeDesc.innerText = "자동 제어 중...";
+                    manualUi.classList.add('hidden');
+                    autoUi.classList.remove('hidden');
+                } else {
+                    toggleBg.classList.replace('bg-blue-500', 'bg-slate-300');
+                    toggleDot.classList.remove('translate-x-4');
+                    modeDesc.innerText = "수동 제어 중...";
+                    manualUi.classList.remove('hidden');
+                    autoUi.classList.add('hidden');
+                    
+                    // 수동 모드로 돌아갈 때 애니메이션 정지
+                    isPlaying = false;
+                    updatePlayStatusUI();
+                    cancelAnimationFrame(animationId);
+                }
+            });
+
+            // 애니메이션 루프 (requestAnimationFrame 사용으로 60fps 보장)
+            function animate() {
+                if (!isPlaying) return;
+
+                // 프레임당 알파값 증가량 (0.0075 -> 1.5배 빠른 재생, 약 2.2초 완성)
+                currentAlpha += 0.0075; 
+                
+                if (currentAlpha >= 1.0) {
+                    currentAlpha = 1.0;
+                    isPlaying = false;
+                    updatePlayStatusUI();
+                }
+
+                // 슬라이더 값 동기화
+                alphaSlider.value = currentAlpha;
+                alphaValText.innerText = currentAlpha.toFixed(2);
+                updatePlayStatusUI();
+                
+                renderCanvas();
+
+                if (isPlaying) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+
+            function updatePlayStatusUI() {
+                if (isPlaying) {
+                    playStatus.innerHTML = `<span class="text-emerald-600 font-bold">▶️ 재생 중: ${currentAlpha.toFixed(2)}</span>`;
+                    playStatus.classList.replace('bg-slate-100', 'bg-emerald-50');
+                } else {
+                    playStatus.innerHTML = `⏸️ 일시 정지`;
+                    playStatus.classList.replace('bg-emerald-50', 'bg-slate-100');
+                }
+            }
+
+            // 재생/일시정지 버튼
+            btnPlay.addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                
+                if (isPlaying && currentAlpha >= 1.0) {
+                    currentAlpha = 0.0; // 끝났으면 처음부터 다시
+                }
+                
+                updatePlayStatusUI();
+                
+                if (isPlaying) {
+                    animate();
+                } else {
+                    cancelAnimationFrame(animationId);
+                }
+            });
+        </script>
+    </body>
+    </html>
+'''
+
+# components.html 함수를 이용해 렌더링
+components.html(html_code, height=800, scrolling=True)
