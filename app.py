@@ -14,7 +14,6 @@ def main_page():
 # 3. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
 pages = {
     "인공지능 수학": [
-        st.Page("./인공지능수학/Dissolve.py", title="디졸브 효과"),
         st.Page("./인공지능수학/GrayScale.py", title="그레이 필터 이미지 데이터 다운로드"),
     ],
     "메인페이지": [
