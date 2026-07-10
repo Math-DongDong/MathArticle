@@ -18,23 +18,23 @@ def main_page():
     # 이미지가 없다면 우선 비워두셔도 에러가 나지 않도록 처리해 두었습니다.
     cards_data = [
         {
-            "title": "📐 중학 수학",
-            "image": "./기타/middle_math.png",   # 1. 중학 수학 이미지 경로 
+            "title": "중학 수학",
+            "image": "./기타/중학수학.jpg",   # 1. 중학 수학 이미지 경로 
             "link": "https://mathzip.streamlit.app" # 1. 중학 수학 앱 링크
         },
         {
-            "title": "🤖 인공지능 수학",
-            "image": "./기타/ai_math.png",       # 2. 인공지능 수학 이미지 경로
+            "title": "인공지능 수학",
+            "image": "./기타/인공지능수학.jpg",       # 2. 인공지능 수학 이미지 경로
             "link": "https://ai-math.streamlit.app" # 2. 인공지능 수학 앱 링크
         },
         {
-            "title": "🏭 산업 수학",
-            "image": "./기타/industry_math.png", # 3. 산업 수학 이미지 경로
+            "title": "산업 수학",
+            "image": "./기타/산업수학.jpg", # 3. 산업 수학 이미지 경로
             "link": "https://https://industrialmath.streamlit.app/" # 3. 산업 수학 앱 링크
         },
         {
-            "title": "💬 챗봇",
-            "image": "./기타/chatbot.png",       # 4. 챗봇 이미지 경로
+            "title": "동동봇",
+            "image": "./기타/동동이.PNG",       # 4. 챗봇 이미지 경로
             "link": "https://dongdongbot.streamlit.app/" # 4. 챗봇 앱 링크
         }
     ]
@@ -55,12 +55,9 @@ def main_page():
                     # 파일이 아직 없을 때는 에러 대신 빈 박스 안내문구를 보여줍니다.
                     st.info("🖼️ (이미지 준비 중)", icon="ℹ️")
 
-                # 2. 제목 표시
-                st.subheader(data["title"])
-
-                # 3. 링크 이동 버튼
+                # 2. 링크 이동 버튼
                 # st.link_button은 클릭 시 새 탭이나 현재 탭에서 지정된 URL로 이동시킵니다.
-                st.link_button("바로가기", url=data["link"], use_container_width=True)
+                st.link_button(data["title"], url=data["link"], type ='tertiary',use_container_width=True)
 
 
 # 3. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
