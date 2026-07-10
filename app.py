@@ -30,7 +30,7 @@ def main_page():
         {
             "title": "산업 수학 (바로가기)",
             "image": "./기타/산업수학.jpg", # 3. 산업 수학 이미지 경로
-            "link": "https://https://industrialmath.streamlit.app/" # 3. 산업 수학 앱 링크
+            "link": "https://industrialmath.streamlit.app/" # 3. 산업 수학 앱 링크
         },
         {
             "title": "동동봇 (바로가기)",
