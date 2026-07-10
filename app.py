@@ -60,7 +60,7 @@ def main_page():
 
                 # 3. 링크 이동 버튼
                 # st.link_button은 클릭 시 새 탭이나 현재 탭에서 지정된 URL로 이동시킵니다.
-                st.link_button("🚀 바로가기", url=data["link"], use_container_width=True)
+                st.link_button("바로가기", url=data["link"], use_container_width=True)
 
 
 # 3. 메뉴바 설정(각 페이지의 실제 콘텐츠는 별도의 파일에 존재).
