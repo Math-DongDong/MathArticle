@@ -11,7 +11,7 @@ st.set_page_config(
 # 2. 메인 페이지 정의
 def main_page():
     # 메인 페이지 타이틀 및 설명
-    st.markdown("<h1 style='text-align: center; color: #2c3e50;'>동동쌤의 수학 모음</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #2c3e50;'>동동쌤's 웹 앱</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #64748b;'>원하는 학습 주제를 선택하여 바로 이동해보세요!</p>", unsafe_allow_html=True)
 
     # 💡 [설정 영역] 선생님께서 이미지 경로와 링크 주소를 입력하는 곳입니다!
