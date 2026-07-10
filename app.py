@@ -3,7 +3,7 @@ import os
 
 # 1. 페이지 레이아웃 설정
 st.set_page_config(
-    page_title="동동쌤의 웹 앱 모음",
+    page_title="동동쌤's 웹 앱",
     page_icon="./기타/동동이.PNG",
     layout="wide"
 )
