@@ -25,7 +25,7 @@ def main_page():
         {
             "title": "인공지능 수학 (바로가기)",
             "image": "./기타/인공지능수학.jpg",       # 2. 인공지능 수학 이미지 경로
-            "link": "https://ai-math.streamlit.app" # 2. 인공지능 수학 앱 링크
+            "link": "https://math-dongdong.github.io/pages/aimath/image/resolution.html" # 2. 인공지능 수학 앱 링크
         },
         {
             "title": "산업 수학 (바로가기)",
