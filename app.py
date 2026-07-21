@@ -65,9 +65,6 @@ pages = {
     "메인페이지": [
         st.Page(main_page, title="홈 화면", default=True),
     ],
-    "인공지능 수학": [
-        st.Page("./인공지능수학/GrayScale.py", title="그레이 필터 이미지 데이터 다운로드"),
-    ],
 }
 
 # 4. 네비게이션 UI 생성(메뉴바 위치)
