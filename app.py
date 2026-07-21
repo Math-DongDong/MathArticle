@@ -20,7 +20,7 @@ def main_page():
         {
             "title": "중학 수학 (바로가기)",
             "image": "./기타/중학수학.jpg",   # 1. 중학 수학 이미지 경로 
-            "link": "https://mathzip.streamlit.app" # 1. 중학 수학 앱 링크
+            "link": "https://math-dongdong.github.io/pages/middleschool/game/pig_game.html" # 1. 중학 수학 앱 링크
         },
         {
             "title": "인공지능 수학 (바로가기)",
